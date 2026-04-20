@@ -769,9 +769,133 @@
     body.sidebar-collapsed .charts-grid { grid-template-columns:repeat(2,1fr) !important; }
   }
 
+  /* ============ LOGIN OVERLAY ============ */
+  .login-overlay {
+    position:fixed; inset:0; z-index:9999;
+    background:linear-gradient(135deg,#1e1b4b 0%,#4f46e5 50%,#06b6d4 100%);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .login-overlay.hidden { display:none; }
+  .login-box {
+    width:100%; max-width:430px;
+    background:#fff; border-radius:20px; padding:38px 34px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.3);
+    animation:loginFadeIn 0.5s ease;
+  }
+  @keyframes loginFadeIn {
+    from { opacity:0; transform:translateY(20px) scale(0.96); }
+    to { opacity:1; transform:translateY(0) scale(1); }
+  }
+  .login-logo {
+    width:72px; height:72px; margin:0 auto 18px;
+    background:linear-gradient(135deg,#4f46e5,#06b6d4);
+    border-radius:18px; display:flex; align-items:center; justify-content:center;
+    font-size:32px; font-weight:900; color:#fff;
+    box-shadow:0 8px 20px rgba(79,70,229,0.35);
+  }
+  .login-title { text-align:center; font-size:22px; font-weight:800; color:var(--text-main); margin-bottom:6px; }
+  .login-subtitle { text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:26px; }
+  .login-field { margin-bottom:16px; }
+  .login-field label { display:block; font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:6px; }
+  .login-field input {
+    width:100%; padding:12px 14px;
+    border:1.5px solid var(--border); border-radius:10px;
+    font-family:'Cairo'; font-size:14px; outline:none;
+    transition:all 0.2s; background:#f8fafc;
+  }
+  .login-field input:focus {
+    border-color:var(--primary); background:#fff;
+    box-shadow:0 0 0 3px rgba(79,70,229,0.1);
+  }
+  .login-btn {
+    width:100%; padding:13px; margin-top:8px;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    color:#fff; border:none; border-radius:10px;
+    font-family:'Cairo'; font-size:15px; font-weight:700;
+    cursor:pointer; transition:all 0.2s;
+    box-shadow:0 4px 14px rgba(79,70,229,0.35);
+  }
+  .login-btn:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(79,70,229,0.45); }
+  .login-error {
+    background:#fee2e2; color:#991b1b;
+    padding:10px 14px; border-radius:10px;
+    font-size:13px; text-align:center; margin-bottom:14px;
+    border:1px solid #fecaca; display:none;
+  }
+  .login-error.show { display:block; animation:shake 0.3s; }
+  @keyframes shake {
+    0%,100% { transform:translateX(0); }
+    25% { transform:translateX(-6px); }
+    75% { transform:translateX(6px); }
+  }
+  .login-hint {
+    margin-top:18px; padding:12px 14px;
+    background:#f1f5f9; border-radius:10px;
+    font-size:12px; color:var(--text-muted); text-align:center;
+    border:1px dashed #cbd5e1;
+  }
+  .login-hint strong { color:var(--primary); }
+
+  /* ============ CURRENT USER BADGE ============ */
+  .current-user-box {
+    display:flex; align-items:center; gap:10px;
+    padding:6px 14px; background:linear-gradient(135deg,#eef2ff,#e0f2fe);
+    border:1px solid #c7d2fe; border-radius:10px;
+    color:var(--primary-dark); font-weight:700; font-size:13px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .current-user-box:hover { background:#e0e7ff; }
+  .current-user-box .user-ava {
+    width:28px; height:28px; border-radius:50%;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:800;
+  }
+  .current-user-box .user-role-mini {
+    font-size:10px; color:var(--text-muted); font-weight:500;
+    margin-right:4px;
+  }
+  .logout-btn {
+    padding:7px 12px; background:#fee2e2; color:#991b1b;
+    border:1px solid #fecaca; border-radius:10px;
+    font-family:'Cairo'; font-size:12px; font-weight:700;
+    cursor:pointer; transition:all 0.2s;
+    display:flex; align-items:center; gap:5px;
+  }
+  .logout-btn:hover { background:#991b1b; color:#fff; border-color:#991b1b; }
+
+  /* ============ PERMISSION-LOCKED HIDE ============ */
+  body.role-viewer .perm-write { display:none !important; }
+  body:not(.role-admin) .perm-admin { display:none !important; }
+
 </style>
 </head>
 <body>
+
+<!-- ============ LOGIN OVERLAY ============ -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">ف</div>
+    <div class="login-title">نظام المكتب الفني</div>
+    <div class="login-subtitle">تسجيل الدخول للمتابعة إلى لوحة التحكم</div>
+    <div class="login-error" id="login-error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>
+    <form id="login-form" onsubmit="event.preventDefault(); doLogin();">
+      <div class="login-field">
+        <label>📧 البريد الإلكتروني أو اسم المستخدم</label>
+        <input type="text" id="login-user" placeholder="admin@system.com" autocomplete="username" required>
+      </div>
+      <div class="login-field">
+        <label>🔒 كلمة المرور</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="login-btn">🚀 دخول إلى النظام</button>
+    </form>
+    <div class="login-hint">
+      💡 افتراضياً: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="355451585c5b75464c464150581b565a58">[email&#160;protected]</a></strong> / <strong>admin</strong>
+    </div>
+  </div>
+</div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
@@ -862,7 +986,15 @@
           </div>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="openAddModal()">＋ إضافة عقد</button>
+      <button class="btn btn-primary perm-write" onclick="openAddModal()">＋ إضافة عقد</button>
+      <div class="current-user-box" id="current-user-box" title="المستخدم الحالي">
+        <div class="user-ava" id="cu-avatar">م</div>
+        <div style="display:flex;flex-direction:column;line-height:1.2">
+          <span id="cu-name">—</span>
+          <span class="user-role-mini" id="cu-role">—</span>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()" title="تسجيل الخروج">🚪 خروج</button>
     </div>
   </header>
 
@@ -957,6 +1089,7 @@
           </div>
           <span class="search-badge hidden" id="badge-search-contracts"></span>
           <span style="margin-right:auto;font-size:13px;color:var(--text-muted)" id="contracts-count"></span>
+          <button class="btn btn-sm perm-write" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 8px rgba(16,185,129,.3)" onclick="triggerExcelImport('contracts')" title="استيراد ملف Excel واستبدال بيانات العقود">📂 استيراد Excel</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -964,7 +1097,7 @@
               <th>#</th><th>الشركة</th><th>العملية</th><th>الإدارة</th>
               <th>رقم الملف</th><th>رقم المستخلص</th><th>أمر الإسناد</th>
               <th>تاريخ البدء</th><th>تاريخ النهاية</th><th style="color:#2563eb;border-right:3px solid #2563eb">مد المدة</th>
-              <th>القيمة التعاقدية</th><th>تم صرفه</th><th>المستحق</th><th>إجراءات</th>
+              <th>القيمة التعاقدية</th><th>تم صرفه</th><th>المستحق</th><th style="color:#059669;border-right:3px solid #059669">👤 المستخدم</th><th>إجراءات</th>
             </tr></thead>
             <tbody id="contracts-body"></tbody>
           </table>
@@ -990,7 +1123,8 @@
           </div>
           <span class="search-badge hidden" id="badge-search-incoming"></span>
           <span style="margin-right:auto;font-size:13px;color:var(--text-muted)" id="incoming-count"></span>
-          <button class="btn btn-primary btn-sm" onclick="openAddIncomingModal()">＋ مستخلص جديد</button>
+          <button class="btn btn-sm perm-write" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 8px rgba(16,185,129,.3)" onclick="triggerExcelImport('incoming')" title="استيراد ملف Excel واستبدال بيانات الوارد">📂 استيراد Excel</button>
+          <button class="btn btn-primary btn-sm perm-write" onclick="openAddIncomingModal()">＋ مستخلص جديد</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -998,7 +1132,7 @@
               <th>#</th><th>الشركة</th><th>العملية</th><th>الإدارة</th>
               <th>أمر الإسناد</th><th>القيمة التعاقدية</th>
               <th>مستخلص سابق</th><th>مستخلص جديد</th><th>قيمة المستخلص</th>
-              <th>نسبة الإنجاز</th><th>رقم الوارد</th><th>تاريخ الوارد</th><th>إجراءات</th>
+              <th>نسبة الإنجاز</th><th>رقم الوارد</th><th>تاريخ الوارد</th><th style="color:#059669;border-right:3px solid #059669">👤 المستخدم</th><th>إجراءات</th>
             </tr></thead>
             <tbody id="incoming-body"></tbody>
           </table>
@@ -1024,14 +1158,15 @@
           </div>
           <span class="search-badge hidden" id="badge-search-outgoing"></span>
           <span style="margin-right:auto;font-size:13px;color:var(--text-muted)" id="outgoing-count"></span>
-          <button class="btn btn-primary btn-sm" onclick="openAddOutgoingModal()">＋ صادر جديد</button>
+          <button class="btn btn-sm perm-write" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 8px rgba(16,185,129,.3)" onclick="triggerExcelImport('outgoing')" title="استيراد ملف Excel واستبدال بيانات الصادر">📂 استيراد Excel</button>
+          <button class="btn btn-primary btn-sm perm-write" onclick="openAddOutgoingModal()">＋ صادر جديد</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead><tr>
               <th>#</th><th>الشركة</th><th>العملية</th><th>الإدارة</th>
               <th>رقم الملف</th><th>رقم المستخلص</th><th>أمر الإسناد</th>
-              <th>قيمة الصرف</th><th>رقم الصادر</th><th>إدارة الصادر</th><th>تاريخ الصادر</th><th>إجراءات</th>
+              <th>قيمة الصرف</th><th>رقم الصادر</th><th>إدارة الصادر</th><th>تاريخ الصادر</th><th style="color:#059669;border-right:3px solid #059669">👤 المستخدم</th><th>إجراءات</th>
             </tr></thead>
             <tbody id="outgoing-body"></tbody>
           </table>
@@ -1114,12 +1249,15 @@
     <div class="page-section" id="page-users">
       <div class="section-header">
         <div class="section-title">👥 إدارة المستخدمين <span id="users-count-label"></span></div>
-        <button class="btn btn-primary" onclick="openAddUserModal()">＋ إضافة مستخدم</button>
+        <button class="btn btn-primary perm-admin" onclick="openAddUserModal()">＋ إضافة مستخدم</button>
+      </div>
+      <div id="users-admin-only-notice" style="display:none;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:14px 18px;border-radius:12px;margin-bottom:18px;font-size:13px;font-weight:600">
+        ⚠️ إدارة المستخدمين متاحة <u>للمسؤول فقط</u> - يمكنك عرض القائمة فقط دون تعديل.
       </div>
       <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
-        <div class="stat-card blue"><div class="stat-icon">👑</div><div class="stat-value" id="u-admins">0</div><div class="stat-label">مدير نظام</div></div>
-        <div class="stat-card green"><div class="stat-icon">✏️</div><div class="stat-value" id="u-editors">0</div><div class="stat-label">محرر</div></div>
-        <div class="stat-card cyan"><div class="stat-icon">👁</div><div class="stat-value" id="u-viewers">0</div><div class="stat-label">مشاهد</div></div>
+        <div class="stat-card blue"><div class="stat-icon">👑</div><div class="stat-value" id="u-admins">0</div><div class="stat-label">مسؤول</div></div>
+        <div class="stat-card green"><div class="stat-icon">🌐</div><div class="stat-value" id="u-editors">0</div><div class="stat-label">عام</div></div>
+        <div class="stat-card cyan"><div class="stat-icon">👁</div><div class="stat-value" id="u-viewers">0</div><div class="stat-label">عرض فقط</div></div>
       </div>
       <div id="users-list"></div>
     </div>
@@ -1490,10 +1628,11 @@
         <div class="form-group"><label>البريد الإلكتروني *</label><input id="au-email" type="email" placeholder="example@mail.com"></div>
         <div class="form-group"><label>الصلاحية *</label>
           <select id="au-role">
-            <option value="admin">مدير نظام</option>
-            <option value="editor" selected>محرر</option>
-            <option value="viewer">مشاهد</option>
+            <option value="admin">👑 مسؤول (مدير نظام)</option>
+            <option value="general" selected>🌐 عام (شامل كل شيء)</option>
+            <option value="viewer">👁 عرض فقط</option>
           </select>
+          <small style="color:var(--text-muted);font-size:11px;margin-top:3px;display:block">• مسؤول: صلاحيات كاملة + إدارة المستخدمين<br>• عام: إضافة / تعديل / حذف دون إدارة مستخدمين<br>• عرض فقط: مشاهدة البيانات فقط</small>
         </div>
         <div class="form-group"><label>كلمة المرور *</label><input id="au-pass" type="password" placeholder="أدخل كلمة المرور"></div>
         <div class="form-group"><label>رقم الهاتف</label><input id="au-phone" placeholder="01xxxxxxxxx"></div>
@@ -1555,6 +1694,14 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- Hidden file inputs for Excel import -->
+<input type="file" id="excel-import-contracts" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelImport(event,'contracts')">
+<input type="file" id="excel-import-incoming"  accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelImport(event,'incoming')">
+<input type="file" id="excel-import-outgoing"  accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelImport(event,'outgoing')">
+
+<!-- SheetJS library for real Excel file parsing -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // ========================= DATA =========================
@@ -1738,6 +1885,126 @@ function refreshAll() {
   document.getElementById('badge-outgoing').textContent = allOutgoing.length;
 }
 
+// ========================= AUTH / LOGIN =========================
+var currentUser = null;
+var AUTH_STORAGE_KEY = 'maktab_fanni_current_user';
+
+function getCurrentUserName() {
+  return currentUser ? currentUser.name : 'غير معروف';
+}
+function getCurrentUserRole() {
+  return currentUser ? currentUser.role : null;
+}
+function isAdmin()   { return getCurrentUserRole() === 'admin'; }
+function isGeneral() { return getCurrentUserRole() === 'general' || getCurrentUserRole() === 'editor'; }
+function isViewer()  { return getCurrentUserRole() === 'viewer'; }
+function canWrite()  { return isAdmin() || isGeneral(); }
+function ensureCanWrite() {
+  if(!canWrite()) {
+    showToast('⛔ صلاحية العرض فقط — لا يمكنك التعديل أو الحذف أو الإضافة', 'error');
+    return false;
+  }
+  return true;
+}
+function getOpTimestamp() {
+  var d = new Date();
+  var pad = function(n){ return n<10?'0'+n:''+n; };
+  return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+
+function applyRolePermissions() {
+  document.body.classList.remove('role-admin','role-general','role-editor','role-viewer');
+  var r = getCurrentUserRole();
+  if(r) document.body.classList.add('role-'+r);
+
+  // تحديث مربع المستخدم الحالي في الشريط العلوي
+  if(currentUser) {
+    var nameEl = document.getElementById('cu-name');
+    var roleEl = document.getElementById('cu-role');
+    var avEl = document.getElementById('cu-avatar');
+    if(nameEl) nameEl.textContent = currentUser.name;
+    if(roleEl) roleEl.textContent = ROLE_LABELS[currentUser.role] || currentUser.role;
+    if(avEl)   avEl.textContent = (currentUser.name||'م').charAt(0);
+  }
+}
+
+function showLoginOverlay() {
+  var ov = document.getElementById('login-overlay');
+  if(ov) ov.classList.remove('hidden');
+  setTimeout(function(){
+    var inp = document.getElementById('login-user');
+    if(inp) inp.focus();
+  }, 100);
+}
+function hideLoginOverlay() {
+  var ov = document.getElementById('login-overlay');
+  if(ov) ov.classList.add('hidden');
+}
+
+function doLogin() {
+  var idInput = document.getElementById('login-user').value.trim().toLowerCase();
+  var pass = document.getElementById('login-pass').value;
+  var err = document.getElementById('login-error');
+  err.classList.remove('show');
+
+  if(!idInput || !pass) {
+    err.textContent = '⚠️ يرجى إدخال اسم المستخدم وكلمة المرور';
+    err.classList.add('show');
+    return;
+  }
+
+  // البحث من خلال البريد أو الاسم
+  var found = users.find(function(u){
+    var email = (u.email||'').toLowerCase();
+    var name  = (u.name||'').toLowerCase();
+    return (email === idInput || name === idInput) && u.active !== false;
+  });
+
+  if(!found) {
+    err.textContent = '❌ اسم المستخدم غير مسجل';
+    err.classList.add('show');
+    return;
+  }
+  // مقارنة كلمة المرور (إذا لم تكن موجودة نستخدم الافتراضي "123456" أو "admin" للمسؤول)
+  var expected = found.password || (found.role === 'admin' ? 'admin' : '123456');
+  if(pass !== expected) {
+    err.textContent = '❌ كلمة المرور غير صحيحة';
+    err.classList.add('show');
+    return;
+  }
+
+  currentUser = { id: found.id, name: found.name, email: found.email, role: found.role };
+  try { sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser)); } catch(e){}
+
+  applyRolePermissions();
+  hideLoginOverlay();
+  document.getElementById('login-pass').value = '';
+  showToast('✅ مرحباً '+found.name+' - تم تسجيل الدخول بنجاح','success');
+  try { addNotification('تسجيل دخول', found.name+' ('+(ROLE_LABELS[found.role]||found.role)+')', 'blue', '🔑', 'system'); } catch(e){}
+  try { renderUsers(); } catch(e){}
+}
+
+function doLogout() {
+  if(!confirm('هل تريد تسجيل الخروج من النظام؟')) return;
+  try { sessionStorage.removeItem(AUTH_STORAGE_KEY); } catch(e){}
+  currentUser = null;
+  showLoginOverlay();
+  showToast('تم تسجيل الخروج','');
+}
+
+function tryRestoreSession() {
+  try {
+    var raw = sessionStorage.getItem(AUTH_STORAGE_KEY);
+    if(!raw) return false;
+    var saved = JSON.parse(raw);
+    // التحقق من أن المستخدم لا يزال موجوداً
+    var found = users.find(function(u){ return u.id === saved.id && u.active !== false; });
+    if(!found) return false;
+    currentUser = { id: found.id, name: found.name, email: found.email, role: found.role };
+    return true;
+  } catch(e){ return false; }
+}
+
 // ========================= INIT =========================
 async function init() {
   // open DB first
@@ -1781,6 +2048,21 @@ async function init() {
   // تهيئة زر القائمة الجانبية
   var sideBtn = document.getElementById('sidebar-toggle');
   if(sideBtn) { sideBtn.textContent = '✕'; sideBtn.title = 'إخفاء القائمة'; }
+
+  // المصادقة: إما استعادة جلسة سابقة أو إظهار نافذة الدخول
+  if(tryRestoreSession()) {
+    applyRolePermissions();
+    hideLoginOverlay();
+    renderUsers(); // إعادة الرسم بعد التحقق من المستخدم الحالي
+  } else {
+    showLoginOverlay();
+  }
+
+  // دعم ضغط Enter في حقل كلمة السر
+  var lp = document.getElementById('login-pass');
+  if(lp) lp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); doLogin(); } });
+  var lu = document.getElementById('login-user');
+  if(lu) lu.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('login-pass').focus(); } });
 }
 
 // ========================= NAVIGATION =========================
@@ -2204,12 +2486,13 @@ function renderContracts() {
       '<td class="td-num">'+formatNum(val)+'</td>'+
       '<td style="color:var(--success);font-weight:700">'+formatNum(paid)+'</td>'+
       '<td style="color:var(--warning);font-weight:700">'+formatNum(parseNum(r['المستحق بعد ما تم صرفه']))+'</td>'+
+      '<td style="color:#059669;font-weight:700;font-size:12px;border-right:3px solid #059669;background:#ecfdf5">👤 '+(r['المستخدم']||'-')+'</td>'+
       '<td><div style="display:flex;gap:4px">'+
       '<button class="action-btn btn-view" onclick="showContractDetail('+(start+i)+')">👁</button>'+
-      '<button class="action-btn btn-edit" onclick="openEditContractModal('+(start+i)+')">✏️</button>'+
-      '<button class="action-btn btn-del" onclick="confirmDeleteContract('+(start+i)+')">🗑</button>'+
+      '<button class="action-btn btn-edit perm-write" onclick="openEditContractModal('+(start+i)+')">✏️</button>'+
+      '<button class="action-btn btn-del perm-write" onclick="confirmDeleteContract('+(start+i)+')">🗑</button>'+
       '</div></td></tr>';
-  }).join('') || '<tr><td colspan="14"><div class="empty-state"><div class="icon">📋</div><p>لا توجد عقود مطابقة</p></div></td></tr>';
+  }).join('') || '<tr><td colspan="15"><div class="empty-state"><div class="icon">📋</div><p>لا توجد عقود مطابقة</p></div></td></tr>';
 
   renderPagination('contracts', total, contractsPage, function(p){ contractsPage=p; renderContracts(); });
 }
@@ -2285,12 +2568,13 @@ function renderIncoming() {
       '<td><div style="display:flex;align-items:center;gap:6px;min-width:110px"><div style="flex:1;height:6px;background:#e2e8f0;border-radius:999px"><div style="height:100%;width:'+Math.min(parseFloat(pct),100)+'%;background:var(--success);border-radius:999px"></div></div><span style="font-size:12px;font-weight:700;color:var(--success)">'+pct+'%</span></div></td>'+
       '<td><span style="font-size:12px;font-weight:700">'+(r['رقم الوارد']||'-')+'</span></td>'+
       '<td style="font-size:12px">'+(r['تاريخ الوارد']||'-')+'</td>'+
+      '<td style="color:#059669;font-weight:700;font-size:12px;border-right:3px solid #059669;background:#ecfdf5">👤 '+(r['المستخدم']||'-')+'</td>'+
       '<td><div style="display:flex;gap:4px">'+
       '<button class="action-btn btn-view" onclick="showIncomingDetail('+(start+i)+')">👁</button>'+
-      '<button class="action-btn btn-edit" onclick="openEditIncomingModal('+(start+i)+')">✏️</button>'+
-      '<button class="action-btn btn-del" onclick="confirmDeleteIncoming('+(start+i)+')">🗑</button>'+
+      '<button class="action-btn btn-edit perm-write" onclick="openEditIncomingModal('+(start+i)+')">✏️</button>'+
+      '<button class="action-btn btn-del perm-write" onclick="confirmDeleteIncoming('+(start+i)+')">🗑</button>'+
       '</div></td></tr>';
-  }).join('') || '<tr><td colspan="13"><div class="empty-state"><div class="icon">📥</div><p>لا توجد مستخلصات واردة</p></div></td></tr>';
+  }).join('') || '<tr><td colspan="14"><div class="empty-state"><div class="icon">📥</div><p>لا توجد مستخلصات واردة</p></div></td></tr>';
 
   renderPagination('incoming', total, incomingPage, function(p){ incomingPage=p; renderIncoming(); });
 }
@@ -2357,12 +2641,13 @@ function renderOutgoing() {
       '<td style="font-weight:700">'+(r['رقم الصادر']||'-')+'</td>'+
       '<td><span class="badge badge-cyan">'+(r['الادارة (صادر)']||'-')+'</span></td>'+
       '<td style="font-size:12px">'+(r['تاريخ الصادر']||'-')+'</td>'+
+      '<td style="color:#059669;font-weight:700;font-size:12px;border-right:3px solid #059669;background:#ecfdf5">👤 '+(r['المستخدم']||'-')+'</td>'+
       '<td><div style="display:flex;gap:4px">'+
       '<button class="action-btn btn-view" onclick="showOutgoingDetail('+(start+i)+')">👁</button>'+
-      '<button class="action-btn btn-edit" onclick="openEditOutgoingModal('+(start+i)+')">✏️</button>'+
-      '<button class="action-btn btn-del" onclick="confirmDeleteOutgoing('+(start+i)+')">🗑</button>'+
+      '<button class="action-btn btn-edit perm-write" onclick="openEditOutgoingModal('+(start+i)+')">✏️</button>'+
+      '<button class="action-btn btn-del perm-write" onclick="confirmDeleteOutgoing('+(start+i)+')">🗑</button>'+
       '</div></td></tr>';
-  }).join('') || '<tr><td colspan="12"><div class="empty-state"><div class="icon">📤</div><p>لا توجد مستخلصات صادرة</p></div></td></tr>';
+  }).join('') || '<tr><td colspan="13"><div class="empty-state"><div class="icon">📤</div><p>لا توجد مستخلصات صادرة</p></div></td></tr>';
 
   renderPagination('outgoing', total, outgoingPage, function(p){ outgoingPage=p; renderOutgoing(); });
 }
@@ -2515,6 +2800,7 @@ function handleSearch(val) {
 function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
 
 function saveContract() {
+  if(!ensureCanWrite()) return;
   var company = document.getElementById('add-company').value.trim();
   var operation = document.getElementById('add-operation').value.trim();
   if(!company || !operation) { showToast('يرجى ملء الحقول الإلزامية', 'error'); return; }
@@ -2529,7 +2815,8 @@ function saveContract() {
     'تاريخ النهاية': document.getElementById('add-end').value,
     'القيمة التعاقدية': document.getElementById('add-value').value,
     'اجمالي ما تم صرفه': document.getElementById('add-paid').value,
-    'المستحق بعد ما تم صرفه': '', 'مد المدة': ''
+    'المستحق بعد ما تم صرفه': '', 'مد المدة': '',
+    'المستخدم': getCurrentUserName() + ' (إضافة · ' + getOpTimestamp() + ')'
   };
   var val = parseNum(nc['القيمة التعاقدية']);
   var paid = parseNum(nc['اجمالي ما تم صرفه']);
@@ -2572,9 +2859,11 @@ function confirmDeleteOutgoing(idx) {
 }
 function closeDeleteConfirm() { document.getElementById('delete-confirm').classList.remove('open'); pendingDelete=null; }
 function executeDelete() {
+  if(!ensureCanWrite()) { closeDeleteConfirm(); return; }
   if(!pendingDelete) return;
   var t=pendingDelete.type, idx=pendingDelete.idx, name=pendingDelete.name;
   var deletedData = null;
+  var actor = getCurrentUserName();
 
   if(t==='contract') {
     deletedData = allContracts.splice(idx,1)[0];
@@ -2591,9 +2880,14 @@ function executeDelete() {
     renderOutgoing(); renderContracts(); renderDashboard(); renderReports();
   }
 
+  // تسجيل اسم المستخدم في سجل العملية المحذوفة حتى إذا تم التراجع
+  if(deletedData) {
+    deletedData['المستخدم'] = actor + ' (حذف · ' + getOpTimestamp() + ')';
+  }
+
   renderAlerts(); renderNotifications(); renderMonthlySummary();
   saveAllData();
-  addNotification('تم الحذف', name, 'red', '🗑', 'ops');
+  addNotification('تم الحذف بواسطة ' + actor, name, 'red', '🗑', 'ops');
   closeDeleteConfirm();
   showUndoToast({ type:t, idx:idx, data:deletedData }, name);
 }
@@ -2717,6 +3011,7 @@ function openEditContractModal(idx) {
   document.getElementById('edit-contract-modal').classList.add('open');
 }
 function saveEditContract() {
+  if(!ensureCanWrite()) return;
   var idx = parseInt(document.getElementById('edit-contract-idx').value);
   var company = document.getElementById('edit-company').value.trim();
   var operation = document.getElementById('edit-operation').value.trim();
@@ -2736,6 +3031,7 @@ function saveEditContract() {
   allContracts[idx]['القيمة التعاقدية'] = val.toString();
   allContracts[idx]['اجمالي ما تم صرفه'] = paid.toString();
   allContracts[idx]['المستحق بعد ما تم صرفه'] = (val-paid).toString();
+  allContracts[idx]['المستخدم'] = getCurrentUserName() + ' (تعديل · ' + getOpTimestamp() + ')';
   closeModal('edit-contract-modal');
   renderContracts(); renderDashboard(); renderReports(); renderAlerts(); renderNotifications(); renderMonthlySummary();
   saveAllData();
@@ -2803,6 +3099,7 @@ function aiOnOperationChange() {
   autoCalcIncomingPct();
 }
 function saveIncoming() {
+  if(!ensureCanWrite()) return;
   var company = document.getElementById('ai-company').value.trim();
   var opSel = document.getElementById('ai-operation');
   var operation = opSel.options[opSel.selectedIndex] ? opSel.options[opSel.selectedIndex].text.trim() : '';
@@ -2822,7 +3119,8 @@ function saveIncoming() {
     'قيمة المستخلص الحالي': document.getElementById('ai-extract-val').value,
     'نسبة المستخلص': pctDecimal,
     'رقم الوارد': inNo,
-    'تاريخ الوارد': document.getElementById('ai-incoming-date').value.replace(/-/g,'/')
+    'تاريخ الوارد': document.getElementById('ai-incoming-date').value.replace(/-/g,'/'),
+    'المستخدم': getCurrentUserName() + ' (إضافة · ' + getOpTimestamp() + ')'
   };
   allIncoming.unshift(newRow);
   document.getElementById('badge-incoming').textContent = allIncoming.length;
@@ -2853,6 +3151,7 @@ function openEditIncomingModal(idx) {
   document.getElementById('edit-incoming-modal').classList.add('open');
 }
 function saveEditIncoming() {
+  if(!ensureCanWrite()) return;
   var idx = parseInt(document.getElementById('edit-incoming-idx').value);
   var company = document.getElementById('ei-company').value.trim();
   var operation = document.getElementById('ei-operation').value.trim();
@@ -2871,6 +3170,7 @@ function saveEditIncoming() {
   allIncoming[idx]['نسبة المستخلص'] = pctDecimal;
   allIncoming[idx]['رقم الوارد'] = document.getElementById('ei-incoming-no').value;
   allIncoming[idx]['تاريخ الوارد'] = document.getElementById('ei-incoming-date').value.replace(/-/g,'/');
+  allIncoming[idx]['المستخدم'] = getCurrentUserName() + ' (تعديل · ' + getOpTimestamp() + ')';
   closeModal('edit-incoming-modal');
   renderIncoming(); renderDashboard(); renderReports(); renderAlerts(); renderNotifications(); renderMonthlySummary();
   saveAllData();
@@ -2931,6 +3231,7 @@ function aoOnOperationChange() {
   document.getElementById('ao-order').value = selected.dataset.order || '';
 }
 function saveOutgoing() {
+  if(!ensureCanWrite()) return;
   var coSel = document.getElementById('ao-company');
   var opSel = document.getElementById('ao-operation');
   var company = coSel.value ? coSel.value.trim() : '';
@@ -2946,7 +3247,8 @@ function saveOutgoing() {
     'قيمة الصرف حالى': document.getElementById('ao-payout').value,
     'رقم الصادر': outNo,
     'الادارة (صادر)': document.getElementById('ao-outgoing-dept').value,
-    'تاريخ الصادر': document.getElementById('ao-outgoing-date').value.replace(/-/g,'/')
+    'تاريخ الصادر': document.getElementById('ao-outgoing-date').value.replace(/-/g,'/'),
+    'المستخدم': getCurrentUserName() + ' (إضافة · ' + getOpTimestamp() + ')'
   };
   allOutgoing.unshift(newRow);
   document.getElementById('badge-outgoing').textContent = allOutgoing.length;
@@ -2977,6 +3279,7 @@ function openEditOutgoingModal(idx) {
   document.getElementById('edit-outgoing-modal').classList.add('open');
 }
 function saveEditOutgoing() {
+  if(!ensureCanWrite()) return;
   var idx = parseInt(document.getElementById('edit-outgoing-idx').value);
   var company = document.getElementById('eo-company').value.trim();
   var operation = document.getElementById('eo-operation').value.trim();
@@ -2991,6 +3294,7 @@ function saveEditOutgoing() {
   allOutgoing[idx]['رقم الصادر'] = document.getElementById('eo-outgoing-no').value;
   allOutgoing[idx]['الادارة (صادر)'] = document.getElementById('eo-outgoing-dept').value;
   allOutgoing[idx]['تاريخ الصادر'] = document.getElementById('eo-outgoing-date').value.replace(/-/g,'/');
+  allOutgoing[idx]['المستخدم'] = getCurrentUserName() + ' (تعديل · ' + getOpTimestamp() + ')';
   syncOutgoingToContracts();
   closeModal('edit-outgoing-modal');
   renderOutgoing(); renderContracts(); renderDashboard(); renderReports(); renderAlerts(); renderNotifications(); renderMonthlySummary();
@@ -3312,69 +3616,100 @@ function daysDiff(d1, d2) {
 }
 
 // ========================= USER MANAGEMENT =========================
+// الصلاحيات:
+//   admin   = مسؤول (كامل + إدارة مستخدمين)
+//   general = عام (شامل كل شيء ما عدا إدارة المستخدمين)
+//   viewer  = عرض فقط
 var users = [
-  {id:1, name:'مدير النظام', email:'admin@system.com', role:'admin', phone:'01000000000', active:true, created:'2026/01/01'},
-  {id:2, name:'أحمد محمد', email:'ahmed@system.com', role:'editor', phone:'01100000000', active:true, created:'2026/02/15'},
-  {id:3, name:'سارة علي', email:'sara@system.com', role:'viewer', phone:'01200000000', active:true, created:'2026/03/10'}
+  {id:1, name:'مدير النظام', email:'admin@system.com', role:'admin',   phone:'01000000000', password:'admin',   active:true, created:'2026/01/01'},
+  {id:2, name:'أحمد محمد',   email:'ahmed@system.com', role:'general', phone:'01100000000', password:'123456',  active:true, created:'2026/02/15'},
+  {id:3, name:'سارة علي',     email:'sara@system.com',  role:'viewer',  phone:'01200000000', password:'123456',  active:true, created:'2026/03/10'}
 ];
 var userIdCounter = 3;
 
+// ============ إطار الصلاحيات (ACL) ============
+var ROLE_LABELS = { admin:'👑 مسؤول', general:'🌐 عام', viewer:'👁 عرض فقط', editor:'✏️ محرر' };
+var ROLE_CLASSES = { admin:'role-admin', general:'role-editor', viewer:'role-viewer', editor:'role-editor' };
+
 function renderUsers() {
-  var admins = users.filter(function(u){return u.role==='admin';}).length;
-  var editors = users.filter(function(u){return u.role==='editor';}).length;
+  // Migrate legacy 'editor' role → 'general'
+  users.forEach(function(u){ if(u.role === 'editor') u.role = 'general'; });
+
+  var admins  = users.filter(function(u){return u.role==='admin';}).length;
+  var general = users.filter(function(u){return u.role==='general';}).length;
   var viewers = users.filter(function(u){return u.role==='viewer';}).length;
-  document.getElementById('u-admins').textContent = admins;
-  document.getElementById('u-editors').textContent = editors;
+  document.getElementById('u-admins').textContent  = admins;
+  document.getElementById('u-editors').textContent = general;
   document.getElementById('u-viewers').textContent = viewers;
   document.getElementById('users-count-label').textContent = users.length + ' مستخدم';
-  
+
+  // إظهار تنبيه للمستخدمين غير المسؤولين
+  var notice = document.getElementById('users-admin-only-notice');
+  if(notice) notice.style.display = isAdmin() ? 'none' : 'block';
+
   var colors = ['#4f46e5','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
-  var roleLabels = {admin:'مدير نظام', editor:'محرر', viewer:'مشاهد'};
-  var roleClasses = {admin:'role-admin', editor:'role-editor', viewer:'role-viewer'};
-  
+  var isAdminUser = isAdmin();
+
   document.getElementById('users-list').innerHTML = users.map(function(u, i) {
     var initials = u.name.charAt(0);
     var color = colors[i % colors.length];
+    var canEdit = isAdminUser;
+    var actions = '';
+    if(canEdit) {
+      actions = '<button class="action-btn btn-edit" onclick="editUserRole('+u.id+')" title="تغيير الصلاحية">✏️</button>' +
+                (u.id !== 1 ? '<button class="action-btn btn-del" onclick="deleteUser('+u.id+')" title="حذف">🗑</button>' : '');
+    } else {
+      actions = '<span style="font-size:11px;color:var(--text-muted);padding:4px 10px;background:#f1f5f9;border-radius:6px">🔒 محمي</span>';
+    }
+    var meMark = (currentUser && currentUser.id === u.id) ? ' <span style="background:#dbeafe;color:#1e40af;font-size:10px;padding:2px 8px;border-radius:999px;margin-right:6px;font-weight:700">أنت</span>' : '';
     return '<div class="user-card">'+
       '<div class="user-avatar" style="background:'+color+'">'+initials+'</div>'+
-      '<div class="user-info"><h4>'+u.name+'</h4><p>'+u.email+(u.phone?' | '+u.phone:'')+'</p></div>'+
-      '<span class="user-role '+roleClasses[u.role]+'">'+roleLabels[u.role]+'</span>'+
-      '<div style="display:flex;gap:4px">'+
-      '<button class="action-btn btn-edit" onclick="editUserRole('+u.id+')">✏️</button>'+
-      (u.id !== 1 ? '<button class="action-btn btn-del" onclick="deleteUser('+u.id+')">🗑</button>' : '')+
-      '</div></div>';
+      '<div class="user-info"><h4>'+u.name+meMark+'</h4><p>'+u.email+(u.phone?' | '+u.phone:'')+'</p></div>'+
+      '<span class="user-role '+(ROLE_CLASSES[u.role]||'role-viewer')+'">'+(ROLE_LABELS[u.role]||u.role)+'</span>'+
+      '<div style="display:flex;gap:4px">'+actions+'</div></div>';
   }).join('');
 }
 
-function openAddUserModal() { document.getElementById('add-user-modal').classList.add('open'); }
+function openAddUserModal() {
+  if(!isAdmin()) { showToast('⛔ إدارة المستخدمين متاحة للمسؤول فقط','error'); return; }
+  document.getElementById('add-user-modal').classList.add('open');
+}
 function saveUser() {
+  if(!isAdmin()) { showToast('⛔ صلاحيات المسؤول فقط','error'); return; }
   var name = document.getElementById('au-name').value.trim();
   var email = document.getElementById('au-email').value.trim();
   var role = document.getElementById('au-role').value;
   var pass = document.getElementById('au-pass').value.trim();
   var phone = document.getElementById('au-phone').value.trim();
   if(!name || !email || !pass) { showToast('يرجى ملء جميع الحقول الإلزامية','error'); return; }
-  users.push({id:++userIdCounter, name:name, email:email, role:role, phone:phone, active:true, created:formatDate(new Date())});
+  users.push({id:++userIdCounter, name:name, email:email, role:role, phone:phone, password:pass, active:true, created:formatDate(new Date())});
   closeModal('add-user-modal');
   renderUsers();
   saveAllData();
   showToast('تم إضافة المستخدم بنجاح ✅','success');
-  addNotification('مستخدم جديد', 'تم إضافة '+name, 'blue', '👤', 'ops');
+  addNotification('مستخدم جديد', 'تم إضافة '+name+' ('+ (ROLE_LABELS[role]||role) +') بواسطة '+getCurrentUserName(), 'blue', '👤', 'ops');
   ['au-name','au-email','au-pass','au-phone'].forEach(function(id){document.getElementById(id).value='';});
 }
 function editUserRole(id) {
+  if(!isAdmin()) { showToast('⛔ صلاحيات المسؤول فقط','error'); return; }
   var u = users.find(function(x){return x.id===id;});
   if(!u) return;
-  var roles = ['admin','editor','viewer'];
-  var labels = {admin:'مدير نظام', editor:'محرر', viewer:'مشاهد'};
+  // تدوير بين المهام المطلوبة: عام ↔ عرض فقط (المسؤول لا يتغير تلقائياً)
+  if(u.id === 1) { showToast('⚠️ لا يمكن تغيير صلاحية المسؤول الرئيسي','error'); return; }
+  var roles = ['admin','general','viewer'];
   var currentIdx = roles.indexOf(u.role);
+  if(currentIdx === -1) currentIdx = 0;
   var nextIdx = (currentIdx+1) % roles.length;
   u.role = roles[nextIdx];
   renderUsers();
   saveAllData();
-  showToast('تم تغيير صلاحية '+u.name+' إلى '+labels[u.role],'success');
+  showToast('تم تغيير صلاحية '+u.name+' إلى '+(ROLE_LABELS[u.role]||u.role),'success');
+  addNotification('تغيير صلاحية', u.name+' ← '+(ROLE_LABELS[u.role]||u.role)+' (بواسطة '+getCurrentUserName()+')', 'orange', '🔄', 'ops');
 }
 function deleteUser(id) {
+  if(!isAdmin()) { showToast('⛔ صلاحيات المسؤول فقط','error'); return; }
+  if(id === 1) { showToast('⚠️ لا يمكن حذف المسؤول الرئيسي','error'); return; }
+  if(currentUser && currentUser.id === id) { showToast('⚠️ لا يمكنك حذف حسابك الحالي','error'); return; }
   var idx = users.findIndex(function(u){return u.id===id;});
   if(idx === -1) return;
   var deletedUser = users[idx];
@@ -3382,6 +3717,7 @@ function deleteUser(id) {
   renderUsers();
   saveAllData();
   showUndoToast({ type:'user', idx:idx, data:deletedUser }, deletedUser.name);
+  addNotification('حذف مستخدم', deletedUser.name+' (بواسطة '+getCurrentUserName()+')', 'red', '🗑', 'ops');
 }
 
 // ========================= EXCEL EXPORT =========================
@@ -3554,6 +3890,232 @@ function renderMonthlySummary() {
   document.getElementById('month-total-val').textContent = formatNum(monthIncoming + monthOutgoing) + ' ج.م';
 }
 
+
+// ========================= EXCEL IMPORT SYSTEM =========================
+// دعم استيراد ملفات Excel و CSV مع استبدال البيانات القديمة بالجديدة
+
+// تطبيع النص للمقارنة (إزالة التشكيل والمسافات الزائدة والتطويل)
+function normalizeHeader(s) {
+  if(s === null || s === undefined) return '';
+  return String(s)
+    .replace(/[\u064B-\u0652\u0670\u0640]/g, '') // harakat + tatweel
+    .replace(/[\u200B-\u200F\uFEFF]/g, '')       // zero-width & marks
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+// خرائط تطابق أسماء الأعمدة القادمة من Excel مع المفاتيح الداخلية للنظام
+var FIELD_MAPS = {
+  contracts: {
+    'الشركة': 'الشـركة', 'الشـركة': 'الشـركة', 'اسم الشركة': 'الشـركة',
+    'العملية': 'العمليـة', 'العمليـة': 'العمليـة', 'اسم العملية': 'العمليـة', 'بيان العملية': 'العمليـة',
+    'الادارة': 'الادارة', 'الإدارة': 'الادارة',
+    'رقم الملف': 'رقم الملف', 'الملف': 'رقم الملف',
+    'رقم المستخلص': 'رقم المستخلص', 'المستخلص': 'رقم المستخلص',
+    'امر الاسناد': 'امر الاسناد', 'أمر الإسناد': 'امر الاسناد', 'امر الإسناد': 'امر الاسناد', 'أمر الاسناد': 'امر الاسناد',
+    'تاريخ البدء': 'تاريخ البدء', 'تاريخ البداية': 'تاريخ البدء', 'بداية العقد': 'تاريخ البدء',
+    'تاريخ النهاية': 'تاريخ النهاية', 'نهاية العقد': 'تاريخ النهاية',
+    'مد المدة': 'مد المدة', 'مدة الامتداد': 'مد المدة', 'الامتداد': 'مد المدة',
+    'القيمة التعاقدية': 'القيمة التعاقدية', 'قيمة العقد': 'القيمة التعاقدية',
+    'اجمالي ما تم صرفه': 'اجمالي ما تم صرفه', 'إجمالي ما تم صرفه': 'اجمالي ما تم صرفه', 'تم صرفه': 'اجمالي ما تم صرفه', 'المنصرف': 'اجمالي ما تم صرفه',
+    'المستحق بعد ما تم صرفه': 'المستحق بعد ما تم صرفه', 'المستحق': 'المستحق بعد ما تم صرفه', 'المتبقي': 'المستحق بعد ما تم صرفه', 'المستحق بعد الصرف': 'المستحق بعد ما تم صرفه'
+  },
+  incoming: {
+    'الشركة': 'الشـركة', 'الشـركة': 'الشـركة', 'اسم الشركة': 'الشـركة',
+    'العملية': 'العمليـة', 'العمليـة': 'العمليـة', 'اسم العملية': 'العمليـة',
+    'الادارة': 'الادارة', 'الإدارة': 'الادارة',
+    'رقم الملف': 'رقم الملف',
+    'امر الاسناد': 'امر الاسناد', 'أمر الإسناد': 'امر الاسناد', 'امر الإسناد': 'امر الاسناد', 'أمر الاسناد': 'امر الاسناد',
+    'القيمة التعاقدية': 'القيمة التعاقدية', 'قيمة العقد': 'القيمة التعاقدية',
+    'رقم المستخلص سابق': 'رقم المستخلص سابق', 'مستخلص سابق': 'رقم المستخلص سابق', 'المستخلص السابق': 'رقم المستخلص سابق', 'رقم المستخلص السابق': 'رقم المستخلص سابق',
+    'رقم مستخلص الجديد': 'رقم مستخلص الجديد', 'مستخلص جديد': 'رقم مستخلص الجديد', 'المستخلص الجديد': 'رقم مستخلص الجديد', 'رقم المستخلص الجديد': 'رقم مستخلص الجديد',
+    'قيمة المستخلص الحالي': 'قيمة المستخلص الحالي', 'قيمة المستخلص': 'قيمة المستخلص الحالي', 'القيمة الحالية': 'قيمة المستخلص الحالي',
+    'نسبة المستخلص': 'نسبة المستخلص', 'نسبة الإنجاز': 'نسبة المستخلص', 'نسبة الانجاز': 'نسبة المستخلص',
+    'رقم الوارد': 'رقم الوارد', 'الوارد': 'رقم الوارد',
+    'تاريخ الوارد': 'تاريخ الوارد'
+  },
+  outgoing: {
+    'الشركة': 'الشـركة', 'الشـركة': 'الشـركة', 'اسم الشركة': 'الشـركة',
+    'العملية': 'العمليـة', 'العمليـة': 'العمليـة', 'اسم العملية': 'العمليـة',
+    'الادارة': 'الادارة', 'الإدارة': 'الادارة',
+    'رقم الملف': 'رقم الملف',
+    'رقم المستخلص': 'رقم المستخلص',
+    'امر الاسناد': 'امر الاسناد', 'أمر الإسناد': 'امر الاسناد', 'امر الإسناد': 'امر الاسناد', 'أمر الاسناد': 'امر الاسناد',
+    'قيمة الصرف حالى': 'قيمة الصرف حالى', 'قيمة الصرف': 'قيمة الصرف حالى', 'قيمة الصرف الحالي': 'قيمة الصرف حالى', 'قيمة الصرف الحالى': 'قيمة الصرف حالى',
+    'رقم الصادر': 'رقم الصادر', 'الصادر': 'رقم الصادر',
+    'الادارة (صادر)': 'الادارة (صادر)', 'إدارة الصادر': 'الادارة (صادر)', 'ادارة الصادر': 'الادارة (صادر)',
+    'تاريخ الصادر': 'تاريخ الصادر'
+  }
+};
+
+// تحويل رقم Excel للتاريخ إلى صيغة نصية DD/MM/YYYY
+function excelDateToStr(v) {
+  if(v === null || v === undefined || v === '') return '';
+  // إذا كان Date object
+  if(v instanceof Date && !isNaN(v)) {
+    var d = v.getDate(), m = v.getMonth()+1, y = v.getFullYear();
+    return (d<10?'0'+d:d) + '/' + (m<10?'0'+m:m) + '/' + y;
+  }
+  // إذا كان رقم Excel serial
+  if(typeof v === 'number' && v > 1 && v < 2958466) {
+    try {
+      var parsed = XLSX.SSF.parse_date_code(v);
+      if(parsed && parsed.y) {
+        return (parsed.d<10?'0'+parsed.d:parsed.d) + '/' + (parsed.m<10?'0'+parsed.m:parsed.m) + '/' + parsed.y;
+      }
+    } catch(e) {}
+  }
+  return String(v).trim();
+}
+
+// تحويل صف Excel إلى سجل داخلي بأسماء الحقول الصحيحة
+function mapRowToRecord(rawRow, type) {
+  var map = FIELD_MAPS[type];
+  var rec = {};
+  // نبني خريطة منطقية: normalized header -> internal key
+  var normMap = {};
+  Object.keys(map).forEach(function(k){ normMap[normalizeHeader(k)] = map[k]; });
+
+  Object.keys(rawRow).forEach(function(header) {
+    var nh = normalizeHeader(header);
+    var internalKey = normMap[nh];
+    if(!internalKey) return; // عمود غير معروف — نتجاهله
+    var val = rawRow[header];
+
+    // تنظيف حقول التاريخ
+    if(internalKey.indexOf('تاريخ') !== -1 || internalKey === 'مد المدة') {
+      rec[internalKey] = excelDateToStr(val);
+    }
+    // حقول الأرقام المالية
+    else if(internalKey === 'القيمة التعاقدية' || internalKey === 'اجمالي ما تم صرفه' ||
+            internalKey === 'المستحق بعد ما تم صرفه' || internalKey === 'قيمة المستخلص الحالي' ||
+            internalKey === 'قيمة الصرف حالى') {
+      if(val === null || val === undefined || val === '') { rec[internalKey] = 0; }
+      else if(typeof val === 'number') { rec[internalKey] = val; }
+      else {
+        // إزالة الفواصل والمسافات والعملة
+        var cleaned = String(val).replace(/[,،\s]/g,'').replace(/[^\d.\-]/g,'');
+        rec[internalKey] = cleaned === '' ? 0 : (parseFloat(cleaned)||0);
+      }
+    }
+    // حقل النسبة
+    else if(internalKey === 'نسبة المستخلص') {
+      if(typeof val === 'number') {
+        // إذا > 1 إذن هي مئوية مثل 75
+        rec[internalKey] = val > 1 ? (val/100) : val;
+      } else if(val) {
+        var s = String(val).replace('%','').replace(/[,،\s]/g,'').trim();
+        var n = parseFloat(s)||0;
+        rec[internalKey] = n > 1 ? (n/100) : n;
+      } else {
+        rec[internalKey] = 0;
+      }
+    }
+    else {
+      rec[internalKey] = (val === null || val === undefined) ? '' : String(val).trim();
+    }
+  });
+
+  return rec;
+}
+
+// فتح نافذة اختيار ملف
+function triggerExcelImport(type) {
+  if(typeof XLSX === 'undefined') {
+    showToast('⚠️ مكتبة قراءة Excel لم تُحمّل بعد. حاول مرة أخرى خلال ثانية.','error');
+    return;
+  }
+  var inp = document.getElementById('excel-import-' + type);
+  if(inp) { inp.value = ''; inp.click(); }
+}
+
+// معالجة الملف بعد اختياره
+function handleExcelImport(event, type) {
+  var file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  var typeLabels = { contracts:'العقود', incoming:'الوارد', outgoing:'الصادر' };
+  var expectedSheetNames = { contracts:['العقود','contracts','Contracts'],
+                              incoming:['الوارد','incoming','Incoming'],
+                              outgoing:['الصادر','outgoing','Outgoing'] };
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type:'array', cellDates:true });
+
+      // اختيار الشيت المناسب: أولاً نبحث عن الأسماء المتوقعة، وإلا نأخذ أول شيت
+      var sheetName = null;
+      var expected = expectedSheetNames[type].map(function(n){ return n.toLowerCase(); });
+      workbook.SheetNames.forEach(function(n) {
+        if(!sheetName && expected.indexOf(n.trim().toLowerCase()) !== -1) sheetName = n;
+      });
+      if(!sheetName) sheetName = workbook.SheetNames[0];
+
+      var sheet = workbook.Sheets[sheetName];
+      var rows = XLSX.utils.sheet_to_json(sheet, { defval:'', raw:false, dateNF:'dd/mm/yyyy' });
+
+      if(!rows || rows.length === 0) {
+        showToast('⚠️ الملف فارغ أو لا يحتوي على بيانات قابلة للقراءة','error');
+        return;
+      }
+
+      // تحويل الصفوف
+      var mapped = rows.map(function(r){ return mapRowToRecord(r, type); })
+                       .filter(function(r){
+                         // تجاهل الصفوف الفارغة
+                         return r['الشـركة'] || r['العمليـة'] || r['رقم الملف'] || r['امر الاسناد'] || r['رقم الوارد'] || r['رقم الصادر'];
+                       });
+
+      if(mapped.length === 0) {
+        showToast('⚠️ لم يتم العثور على صفوف صالحة. تحقق من أسماء الأعمدة.','error');
+        return;
+      }
+
+      // تأكيد الاستبدال
+      var oldCount = (type==='contracts'?allContracts:type==='incoming'?allIncoming:allOutgoing).length;
+      var msg = 'سيتم استبدال ' + oldCount + ' سجل قديم في «' + typeLabels[type] + '» بـ ' + mapped.length + ' سجل جديد من ملف Excel.\n\nهل أنت متأكد من المتابعة؟\n\n(يمكنك التراجع بعد ذلك من خلال استعادة نسخة احتياطية سابقة)';
+      if(!confirm(msg)) {
+        showToast('تم إلغاء عملية الاستيراد','');
+        return;
+      }
+
+      // الاستبدال
+      if(type === 'contracts')      { allContracts = mapped; }
+      else if(type === 'incoming')  { allIncoming  = mapped; }
+      else if(type === 'outgoing')  { allOutgoing  = mapped; }
+
+      // تحديث كامل للواجهة
+      saveAllData();
+      try { populateFilters && populateFilters(); } catch(e){}
+      try { renderContracts && renderContracts(); } catch(e){}
+      try { renderIncoming  && renderIncoming();  } catch(e){}
+      try { renderOutgoing  && renderOutgoing();  } catch(e){}
+      try { renderDashboard && renderDashboard(); } catch(e){}
+      try { renderReports   && renderReports();   } catch(e){}
+      try { checkAlerts     && checkAlerts();     } catch(e){}
+
+      // تحديث الشارات
+      var bc = document.getElementById('badge-contracts'); if(bc) bc.textContent = allContracts.length;
+      var bi = document.getElementById('badge-incoming');  if(bi) bi.textContent = allIncoming.length;
+      var bo = document.getElementById('badge-outgoing');  if(bo) bo.textContent = allOutgoing.length;
+
+      showToast('✅ تم استيراد ' + mapped.length + ' سجل بنجاح في «' + typeLabels[type] + '»','success');
+      try {
+        addNotification('استيراد Excel', 'تم استبدال بيانات «' + typeLabels[type] + '» بـ ' + mapped.length + ' سجل', 'green', '📂', 'ops');
+      } catch(e){}
+    } catch(err) {
+      console.error('Excel import error:', err);
+      showToast('❌ فشل قراءة الملف: ' + (err.message || 'تنسيق غير مدعوم'),'error');
+    }
+  };
+  reader.onerror = function() {
+    showToast('❌ تعذّر قراءة الملف','error');
+  };
+  reader.readAsArrayBuffer(file);
+}
 
 init();
 </script>
